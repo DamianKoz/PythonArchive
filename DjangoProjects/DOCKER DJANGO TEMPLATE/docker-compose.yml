@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build:
+      context: .
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/app
+    command: bash -c "python manage.py migrate \
+      && python manage.py collectstatic --no-input \
+      && python manage.py runserver 0.0.0.0:8000" # Only use this for Development
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_HOST=db
+      - SECRET_KEY=zm7vfcy=w^rg2oyi&#@^vuqc)yl^#6vun4bzs1j*ew&(%#0iaq
+    depends_on:
+      - db
+# && gunicorn todoproject.asgi:application -b 0.0.0.0:8000 --reload -k uvicorn.workers.UvicornWorker"
